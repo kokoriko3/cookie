@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}ルーム選択 - Djangoチャット{% endblock %}
+
+{% block contents %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 text-center">
+        <h2 class="mb-4">チャットルームに参加</h2>
+        <p class="text-muted">参加、または新しく作成するルーム名を入力してください。</p>
+        
+        <div class="input-group mb-3">
+            <input id="room-name-input" type="text" class="form-control form-control-lg" >
+            <button id="room-name-submit" class="btn btn-primary btn-lg" type="button">ルームに入る</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ページを開いたときに、自動で入力欄にカーソルを合わせる
+    document.querySelector('#room-name-input').focus();
+
+    // Enterキーを押した時もボタンをクリックしたのと同じ動作にする
+    document.querySelector('#room-name-input').onkeyup = function(e) {
+        if (e.keyCode === 13) {  // Enterキーのコードは13
+            document.querySelector('#room-name-submit').click();
+        }
+    };
+
+    // ボタンがクリックされた時の処理
+    document.querySelector('#room-name-submit').onclick = function(e) {
+        // 入力された文字を取得する
+        const roomName = document.querySelector('#room-name-input').value;
+        
+        // 空白じゃなければ、そのルームのURLへページ移動（リダイレクト）する
+        if (roomName.trim() !== "") {
+            window.location.pathname = '/chat/' + encodeURIComponent(roomName) + '/';
+        } else {
+            alert("ルーム名を入力してください！");
+        }
+    };
+</script>
+{% endblock %}

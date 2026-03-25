@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>チャットルーム: {{ room_name }}</title>
+</head>
+<body>
+    <h1>ルーム: {{ room_name }}</h1>
+
+    <div id="chat-log" style="height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;">
+        {% for message in messages %}
+            <div><strong>{{ message.user.username }}</strong>: {{ message.content }}</div>
+        {% empty %}
+            <div id="no-message">まだメッセージはありません。</div>
+        {% endfor %}
+    </div>
+
+    <br>
+    <input id="chat-message-input" type="text" size="50" placeholder="メッセージを入力...">
+    <input id="chat-message-submit" type="button" value="送信">
+
+<script>
+        // 現在のURLからルーム名を取得 ('testroom' など)
+        const roomName = window.location.pathname.split('/')[2];
+
+        // WebSocketの接続先URLを作成して接続
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
+        );
+
+        // メッセージを受信した時の処理
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const chatLog = document.querySelector('#chat-log');
+            const noMessage = document.querySelector('#no-message');
+            
+            // 「まだメッセージはありません」の文字があれば消す
+            if (noMessage) { noMessage.remove(); }
+
+            // 受信したメッセージを画面に追加
+            chatLog.innerHTML += '<div><strong>' + data.username + '</strong>: ' + data.message + '</div>';
+            
+            // 一番下まで自動スクロール
+            chatLog.scrollTop = chatLog.scrollHeight;
+        };
+
+        // エラー時の処理
+        chatSocket.onclose = function(e) {
+            console.error('チャットのWebSocketが切断されました');
+        };
+
+        // 送信ボタンが押された時の処理
+        document.querySelector('#chat-message-submit').onclick = function(e) {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+            
+            if (message.trim() !== "") {
+                // WebSocket経由でサーバーにメッセージを送信
+                chatSocket.send(JSON.stringify({
+                    'message': message
+                }));
+                // 入力欄を空にする
+                messageInputDom.value = '';
+            }
+        };
+
+        // Enterキーでも送信できるようにする
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+    </script>
+</body>
+</html>

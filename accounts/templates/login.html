@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}ログイン{% endblock %}
+
+{% block contents %}
+<div class="container mt-5" style="max-width: 500px;">
+    <h2>ログイン</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">ログインする</button>
+    </form>
+    <p class="mt-3">アカウントをお持ちでない方は<a href="{% url 'accounts:signup' %}">こちらから新規登録</a></p>
+</div>
+{% endblock %}
